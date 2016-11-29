@@ -37,39 +37,38 @@ public class DispatcherFlusher implements StorageFlusher {
 
     private volatile boolean closed;
 
-    private final List<SimpleEntry<SpanChunkFlushCondition, StorageFlusher>> spanChunkFlusherRepository
-            = new ArrayList<SimpleEntry<SpanChunkFlushCondition, StorageFlusher>>();
+    private final SpanFlushCondition spanFlushCondition;
+    private final StorageFlusher spanStorageFlusher;
 
-    private final List<SimpleEntry<SpanFlushCondition, StorageFlusher>> spanFlusherRepository
-            = new ArrayList<SimpleEntry<SpanFlushCondition, StorageFlusher>>();
+    private final SpanChunkFlushCondition spanChunkFlushCondition;
+    private final StorageFlusher spanChunkStorageFlusher;
 
     private final StorageFlusher defaultFlusher;
 
-    public DispatcherFlusher(StorageFlusher defaultFlusher) {
+    public DispatcherFlusher(StorageFlusher defaultFlusher, SpanFlushCondition spanFlushCondition, StorageFlusher spanStorageFlusher, SpanChunkFlushCondition spanChunkFlushCondition, StorageFlusher spanChunkStorageFlusher) {
         if (defaultFlusher == null) {
             throw new NullPointerException("defaultFlusher may not be null");
         }
-
+        if (spanFlushCondition == null) {
+            throw new NullPointerException("spanFlushCondition must not be null");
+        }
+        if (spanStorageFlusher == null) {
+            throw new NullPointerException("spanStorageFlusher must not be null");
+        }
+        if (spanChunkFlushCondition == null) {
+            throw new NullPointerException("spanChunkFlushCondition must not be null");
+        }
+        if (spanChunkStorageFlusher == null) {
+            throw new NullPointerException("spanChunkStorageFlusher must not be null");
+        }
         this.defaultFlusher = defaultFlusher;
-    }
 
-    public void addFlusherCondition(FlushCondition condition, StorageFlusher flusher) {
-        if (closed) {
-            logger.warn("Already closed.");
-            return;
-        }
+        this.spanFlushCondition = spanFlushCondition;
+        this.spanStorageFlusher = spanStorageFlusher;
+        this.spanChunkFlushCondition = spanChunkFlushCondition;
+        this.spanChunkStorageFlusher = spanStorageFlusher;
 
-        if (flusher == null) {
-            throw new NullPointerException("flusher may not be null");
-        }
 
-        if (condition instanceof SpanChunkFlushCondition) {
-            spanChunkFlusherRepository.add(new SimpleEntry<SpanChunkFlushCondition, StorageFlusher>((SpanChunkFlushCondition) condition, flusher));
-        }
-
-        if (condition instanceof SpanFlushCondition) {
-            spanFlusherRepository.add(new SimpleEntry<SpanFlushCondition, StorageFlusher>((SpanFlushCondition) condition, flusher));
-        }
     }
 
     @Override
@@ -79,13 +78,11 @@ public class DispatcherFlusher implements StorageFlusher {
             return;
         }
 
-        for (SimpleEntry<SpanChunkFlushCondition, StorageFlusher> entry : spanChunkFlusherRepository) {
-            SpanChunkFlushCondition condition = entry.getKey();
-            StorageFlusher flusher = entry.getValue();
-            if (condition.matches(spanChunk, flusher)) {
-                flusher.flush(spanChunk);
-                return;
-            }
+        SpanChunkFlushCondition condition = this.spanChunkFlushCondition;
+        StorageFlusher flusher = this.spanChunkStorageFlusher;
+        if (condition.matches(spanChunk, flusher)) {
+            flusher.flush(spanChunk);
+            return;
         }
 
         defaultFlusher.flush(spanChunk);
@@ -98,13 +95,11 @@ public class DispatcherFlusher implements StorageFlusher {
             return;
         }
 
-        for (SimpleEntry<SpanFlushCondition, StorageFlusher> entry : spanFlusherRepository) {
-            SpanFlushCondition condition = entry.getKey();
-            StorageFlusher flusher = entry.getValue();
-            if (condition.matches(span, flusher)) {
-                flusher.flush(span);
-                return;
-            }
+        SpanFlushCondition condition = this.spanFlushCondition;
+        StorageFlusher flusher = this.spanStorageFlusher;
+        if (condition.matches(span, flusher)) {
+            flusher.flush(span);
+            return;
         }
 
         defaultFlusher.flush(span);
@@ -119,71 +114,11 @@ public class DispatcherFlusher implements StorageFlusher {
             closed = true;
         }
 
-        Set<StorageFlusher> storageFlusherSet = new HashSet<StorageFlusher>();
-        for (SimpleEntry<SpanChunkFlushCondition, StorageFlusher> entry : spanChunkFlusherRepository) {
-            storageFlusherSet.add(entry.getValue());
-        }
-        for (SimpleEntry<SpanFlushCondition, StorageFlusher> entry : spanFlusherRepository) {
-            storageFlusherSet.add(entry.getValue());
-        }
-
-        for (StorageFlusher flusher : storageFlusherSet) {
-            if (flusher != null) {
-                flusher.stop();
-            }
-        }
-
+        spanChunkStorageFlusher.stop();
+        spanStorageFlusher.stop();
         defaultFlusher.stop();
     }
 
-    static class SimpleEntry<K, V> implements Map.Entry<K, V> {
-
-        private final K key;
-
-        private V value;
-
-        public SimpleEntry(K key, V value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        public K getKey() {
-            return key;
-        }
-
-        public V getValue() {
-            return value;
-        }
-
-        public V setValue(V value) {
-            V oldValue = this.value;
-            this.value = value;
-            return oldValue;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (!(o instanceof Map.Entry<?, ?>)) {
-                return false;
-            }
-            @SuppressWarnings("rawtypes")
-            Map.Entry e = (Map.Entry) o;
-            return eq(key, e.getKey()) && eq(value, e.getValue());
-        }
-
-        @Override
-        public int hashCode() {
-            return (key == null? 0 : key.hashCode()) ^ (value == null? 0 : value.hashCode());
-        }
-
-        @Override
-        public String toString() {
-            return key + "=" + value;
-        }
-
-        private static boolean eq(Object o1, Object o2) {
-            return o1 == null? o2 == null : o1.equals(o2);
-        }
-    }
 
 }
+

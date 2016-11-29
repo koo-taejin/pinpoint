@@ -21,7 +21,7 @@ import com.navercorp.pinpoint.profiler.context.SpanChunk;
 /**
  * @author Taejin Koo
  */
-public interface SpanChunkFlushCondition extends FlushCondition {
+public interface SpanChunkFlushCondition {
 
     boolean matches(SpanChunk spanChunk, StorageFlusher flusher);
 

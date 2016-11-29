@@ -16,6 +16,7 @@
 
 package com.navercorp.pinpoint.rpc.util;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -26,20 +27,6 @@ public final class ListUtils {
     private ListUtils() {
     }
 
-    public static int size(List list) {
-        if (list == null) {
-            return 0;
-        }
-        return list.size();
-    }
-
-    public static boolean isEmpty(List list) {
-        if (list == null || list.isEmpty()) {
-            return true;
-        }
-
-        return false;
-    }
 
     public static <V> boolean addIfValueNotNull(List<V> list, V value) {
         if (value == null) {

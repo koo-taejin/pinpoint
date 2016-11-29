@@ -16,9 +16,9 @@
 
 package com.navercorp.pinpoint.profiler.context.storage.flush;
 
+import com.navercorp.pinpoint.common.util.CollectionUtils;
 import com.navercorp.pinpoint.profiler.context.Span;
 import com.navercorp.pinpoint.profiler.context.SpanChunk;
-import com.navercorp.pinpoint.rpc.util.ListUtils;
 
 /**
  * @author Taejin Koo
@@ -49,7 +49,7 @@ public class SpanEventThresholdCondition implements SpanChunkFlushCondition, Spa
 
     @Override
     public boolean matches(Span span, StorageFlusher flusher) {
-        int size = ListUtils.size(span.getSpanEventList());
+        int size = CollectionUtils.nullSafeSize(span.getSpanEventList());
         if (size <= threshold) {
             return true;
         }
@@ -58,7 +58,7 @@ public class SpanEventThresholdCondition implements SpanChunkFlushCondition, Spa
 
     @Override
     public boolean matches(SpanChunk spanChunk, StorageFlusher flusher) {
-        int size = ListUtils.size(spanChunk.getSpanEventList());
+        int size = CollectionUtils.nullSafeSize(spanChunk.getSpanEventList());
         if (size <= threshold) {
             return true;
         }

@@ -343,9 +343,9 @@ public class DefaultAgent implements Agent {
     }
 
     private StorageFlusher createStorageFlusher(DataSender dataSender, ProfilerConfig config) {
-        RemoteFlusher remoteFlusher = new RemoteFlusher(dataSender);
         if (config.isIoGlobalStorageEnable()) {
-            DispatcherFlusher dispatcherFlusher = new DispatcherFlusher(remoteFlusher);
+            RemoteFlusher remoteFlusher = new RemoteFlusher(dataSender);
+
 
             int globalStorageBufferSize = config.getIoGlobalStorageBufferSize();
             int upperLimitPercent = config.getIoGlobalStorageUseUpperLimitPercent();
@@ -354,10 +354,12 @@ public class DefaultAgent implements Agent {
             GlobalAutoFlusher globalAutoFlusher = new GlobalAutoFlusher(dataSender, globalStorageBufferSize);
             globalAutoFlusher.start(config.getIoGlobalStorageFlushInterval());
 
-            dispatcherFlusher.addFlusherCondition(condition, globalAutoFlusher);
+
+            DispatcherFlusher dispatcherFlusher = new DispatcherFlusher(remoteFlusher, condition, globalAutoFlusher, condition, globalAutoFlusher);
 
             return dispatcherFlusher;
         } else {
+            RemoteFlusher remoteFlusher = new RemoteFlusher(dataSender);
             return remoteFlusher;
         }
     }

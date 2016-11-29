@@ -21,7 +21,7 @@ import com.navercorp.pinpoint.profiler.context.Span;
 /**
  * @author Taejin Koo
  */
-public interface SpanFlushCondition extends FlushCondition {
+public interface SpanFlushCondition {
 
     boolean matches(Span span, StorageFlusher flusher);
 

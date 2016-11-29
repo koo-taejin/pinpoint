@@ -33,10 +33,10 @@ public class DispatcherFlusherTest {
     @Test
     public void dispatchTest1() throws Exception {
         CountingStorageFlusher defaultFlusher = new CountingStorageFlusher();
-        DispatcherFlusher dispatcherFlusher = new DispatcherFlusher(defaultFlusher);
+
 
         CountingStorageFlusher neverExecuteFlusher = new CountingStorageFlusher();
-        dispatcherFlusher.addFlusherCondition(new AlwaysRejectFlushCondition(), neverExecuteFlusher);
+        DispatcherFlusher dispatcherFlusher = new DispatcherFlusher(defaultFlusher, new AlwaysRejectFlushCondition(), neverExecuteFlusher, new AlwaysRejectFlushCondition(), neverExecuteFlusher);
 
         Assert.assertFalse(defaultFlusher.isClosed());
         Assert.assertFalse(neverExecuteFlusher.isClosed());
@@ -59,10 +59,10 @@ public class DispatcherFlusherTest {
     @Test
     public void dispatchTest2() throws Exception {
         CountingStorageFlusher defaultFlusher = new CountingStorageFlusher();
-        DispatcherFlusher dispatcherFlusher = new DispatcherFlusher(defaultFlusher);
+
 
         CountingStorageFlusher alwaysExecuteFlusher = new CountingStorageFlusher();
-        dispatcherFlusher.addFlusherCondition(new AlwaysAcceptFlushCondition(), alwaysExecuteFlusher);
+        DispatcherFlusher dispatcherFlusher = new DispatcherFlusher(defaultFlusher, new AlwaysAcceptFlushCondition(), alwaysExecuteFlusher, new AlwaysAcceptFlushCondition(), alwaysExecuteFlusher);
 
         Assert.assertFalse(defaultFlusher.isClosed());
         Assert.assertFalse(alwaysExecuteFlusher.isClosed());

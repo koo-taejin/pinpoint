@@ -25,6 +25,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.navercorp.pinpoint.common.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,9 +71,13 @@ public class GlobalAutoFlusher implements StorageFlusher {
 
     @Override
     public void flush(SpanChunk spanChunk) {
-        AssertUtils.assertNotNull(spanChunk);
-        AssertUtils.assertTrue(ListUtils.size(spanChunk.getSpanEventList()) <= flushBufferSize,
-                "SpanEvent size(" + ListUtils.size(spanChunk.getSpanEventList()) + ") must be less than " + flushBufferSize);
+        if (spanChunk == null) {
+            throw new NullPointerException("spanChunk must not be null");
+        }
+
+        if (CollectionUtils.nullSafeSize(spanChunk.getSpanEventList()) <= flushBufferSize) {
+            throw new IllegalArgumentException("SpanEvent size(" + CollectionUtils.nullSafeSize(spanChunk.getSpanEventList()) + ") must be less than " + flushBufferSize);
+        }
 
         boolean offered = spanChunkHolder.offer(spanChunk);
         if (!offered) {
@@ -82,9 +87,12 @@ public class GlobalAutoFlusher implements StorageFlusher {
 
     @Override
     public void flush(Span span) {
-        AssertUtils.assertNotNull(span);
-        AssertUtils.assertTrue(ListUtils.size(span.getSpanEventList()) <= flushBufferSize,
-                "SpanEvent size(" + ListUtils.size(span.getSpanEventList()) + ") must be less than " + flushBufferSize);
+        if (span == null) {
+            throw new NullPointerException("span must not be null");
+        }
+        if (CollectionUtils.nullSafeSize(span.getSpanEventList()) <= flushBufferSize) {
+            throw new IllegalArgumentException("SpanEvent size(" + CollectionUtils.nullSafeSize(span.getSpanEventList()) + ") must be less than " + flushBufferSize);
+        }
 
         boolean offered = spanHolder.offer(span);
         if (!offered) {
@@ -93,13 +101,15 @@ public class GlobalAutoFlusher implements StorageFlusher {
     }
 
     public void start(long period) {
-        executor = Executors.newScheduledThreadPool(1, new PinpointThreadFactory("Pinpoint-Global-Storage-Auto-Flusher", true));
-        executor.scheduleAtFixedRate(new FlushTask(), 0L, period, TimeUnit.MILLISECONDS);
+        final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1, new PinpointThreadFactory("Pinpoint-Global-Storage-Auto-Flusher", true));
+        executorService.scheduleAtFixedRate(new FlushTask(), 0L, period, TimeUnit.MILLISECONDS);
+        executor = executorService;
         this.period = period;
     }
 
     @Override
     public void stop() {
+        final ScheduledExecutorService executor = this.executor;
         if (executor != null) {
             executor.shutdown();
             try {
@@ -201,7 +211,7 @@ public class GlobalAutoFlusher implements StorageFlusher {
         private boolean addSpanChunk(SpanChunk spanChunk) {
             AssertUtils.assertNotNull(spanChunk);
 
-            int spanEventSize = ListUtils.size(spanChunk.getSpanEventList());
+            int spanEventSize = CollectionUtils.nullSafeSize(spanChunk.getSpanEventList());
             if (spanEventSize > canStoreSpanEventSize) {
                 return false;
             }
@@ -214,7 +224,7 @@ public class GlobalAutoFlusher implements StorageFlusher {
         private boolean addSpan(Span span) {
             AssertUtils.assertNotNull(span);
 
-            int spanEventSize = ListUtils.size(span.getSpanEventList());
+            int spanEventSize = CollectionUtils.nullSafeSize(span.getSpanEventList());
             if (spanEventSize > canStoreSpanEventSize) {
                 return false;
             }
@@ -228,11 +238,11 @@ public class GlobalAutoFlusher implements StorageFlusher {
             TSpanAndSpanChunkList spanAndSpanChunkList = new TSpanAndSpanChunkList();
 
             boolean empty = true;
-            if (!ListUtils.isEmpty(spanChunkList)) {
+            if (!CollectionUtils.isEmpty(spanChunkList)) {
                 empty = false;
                 spanAndSpanChunkList.setSpanChunkList((List) spanChunkList);
             }
-            if (!ListUtils.isEmpty(spanList)) {
+            if (!CollectionUtils.isEmpty(spanList)) {
                 empty = false;
                 spanAndSpanChunkList.setSpanList((List) spanList);
             }
@@ -250,7 +260,7 @@ public class GlobalAutoFlusher implements StorageFlusher {
         }
 
         private boolean isEmpty() {
-            return ListUtils.size(spanChunkList) == 0 && ListUtils.size(spanList) == 0;
+            return CollectionUtils.isEmpty(spanChunkList) && CollectionUtils.isEmpty(spanList);
         }
 
     }
