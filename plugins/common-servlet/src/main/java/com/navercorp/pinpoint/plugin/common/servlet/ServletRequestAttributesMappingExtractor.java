@@ -16,18 +16,20 @@
 
 package com.navercorp.pinpoint.plugin.common.servlet;
 
+import com.navercorp.pinpoint.bootstrap.plugin.uri.UriExtractor;
 import com.navercorp.pinpoint.common.trace.UriExtractorType;
 import com.navercorp.pinpoint.common.util.ArrayUtils;
 import com.navercorp.pinpoint.common.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.URI;
 import java.util.Arrays;
 
 /**
  * @author Taejin Koo
  */
-public class ServletRequestAttributesMappingExtractor implements ServletRequestMappingExtractor {
+public class ServletRequestAttributesMappingExtractor implements UriExtractor<HttpServletRequest> {
+
+    static final UriExtractorType TYPE = UriExtractorType.SERVLET_REQUEST_ATTRIBUTE;
 
     private final String[] attributeNames;
 
@@ -46,22 +48,6 @@ public class ServletRequestAttributesMappingExtractor implements ServletRequestM
 
     @Override
     public String getUri(HttpServletRequest request, String rawUri) {
-        for (String attributeName : attributeNames) {
-            Object uriMapping = request.getAttribute(attributeName);
-            if (!(uriMapping instanceof String)) {
-                continue;
-            }
-
-            if (StringUtils.hasLength((String) uriMapping)) {
-                return (String) uriMapping;
-            }
-        }
-
-        return null;
-    }
-
-    @Override
-    public String getUri(HttpServletRequest request, URI rawUri) {
         for (String attributeName : attributeNames) {
             Object uriMapping = request.getAttribute(attributeName);
             if (!(uriMapping instanceof String)) {

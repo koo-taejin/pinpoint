@@ -30,6 +30,11 @@ import com.navercorp.pinpoint.bootstrap.plugin.request.ServerHeaderRecorder;
 import com.navercorp.pinpoint.bootstrap.plugin.request.ServletRequestListenerBuilder;
 import com.navercorp.pinpoint.bootstrap.plugin.request.ServletRequestListener;
 import com.navercorp.pinpoint.bootstrap.plugin.request.util.ParameterRecorder;
+import com.navercorp.pinpoint.bootstrap.plugin.uri.UriExtractorProviderLocator;
+import com.navercorp.pinpoint.bootstrap.plugin.uri.UriMappingExtractorProvider;
+import com.navercorp.pinpoint.bootstrap.plugin.uri.UriStatRecorder;
+import com.navercorp.pinpoint.bootstrap.plugin.uri.UriStatRecorderFactory;
+import com.navercorp.pinpoint.plugin.common.servlet.ServletRequestUriExtractorService;
 import com.navercorp.pinpoint.plugin.common.servlet.util.ArgumentValidator;
 import com.navercorp.pinpoint.plugin.common.servlet.util.HttpServletRequestAdaptor;
 import com.navercorp.pinpoint.plugin.common.servlet.util.ParameterRecorderFactory;
@@ -56,7 +61,7 @@ public class StandardHostValveInvokeInterceptor implements AroundInterceptor {
     private final ServletRequestListener<HttpServletRequest> servletRequestListener;
 
 
-    public StandardHostValveInvokeInterceptor(TraceContext traceContext, MethodDescriptor descriptor, RequestRecorderFactory<HttpServletRequest> requestRecorderFactory) {
+    public StandardHostValveInvokeInterceptor(TraceContext traceContext, MethodDescriptor descriptor, RequestRecorderFactory<HttpServletRequest> requestRecorderFactory, UriStatRecorderFactory uriStatRecorderFactory) {
         this.methodDescriptor = descriptor;
         this.argumentValidator = new ServletArgumentValidator(logger, 0, HttpServletRequest.class, 1, HttpServletResponse.class);
         final TomcatConfig config = new TomcatConfig(traceContext.getProfilerConfig());
@@ -76,6 +81,11 @@ public class StandardHostValveInvokeInterceptor implements AroundInterceptor {
         builder.setServerHeaderRecorder(profilerConfig.readList(ServerHeaderRecorder.CONFIG_KEY_RECORD_REQ_HEADERS));
         builder.setServerCookieRecorder(profilerConfig.readList(ServerCookieRecorder.CONFIG_KEY_RECORD_REQ_COOKIES));
         this.servletRequestListener = builder.build();
+
+        UriStatRecorder<HttpServletRequest> httpServletRequestUriStatRecorder = uriStatRecorderFactory.create(new ServletRequestUriExtractorService());
+
+        System.out.println("####################################### " + uriStatRecorderFactory);
+        System.out.println("####################################### " + httpServletRequestUriStatRecorder);
     }
 
     @Override

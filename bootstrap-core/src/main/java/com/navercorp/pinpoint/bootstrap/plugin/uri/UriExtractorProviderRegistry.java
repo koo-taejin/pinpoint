@@ -34,10 +34,10 @@ public class UriExtractorProviderRegistry implements UriExtractorProviderLocator
     }
 
     @Override
-    public <T extends UriExtractor> List<T> get(Class<T> type, UriExtractorType uriExtractorType) {
+    public <T extends UriExtractorProvider> List<T> get(Class<T> type, UriExtractorType uriExtractorType) {
         List<T> result = new ArrayList<T>();
         for (UriExtractorProvider uriExtractorProvider : uriExtractorProviderList) {
-            if (!uriExtractorProvider.getClass().isInstance(type)) {
+            if (!type.isInstance(uriExtractorProvider)) {
                 continue;
             }
             if (uriExtractorProvider.getUriExtractorType() == uriExtractorType) {

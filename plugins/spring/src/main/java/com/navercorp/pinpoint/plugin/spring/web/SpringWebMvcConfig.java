@@ -30,7 +30,7 @@ public class SpringWebMvcConfig {
             throw new NullPointerException("config");
         }
 
-        this.uriStatEnable = config.readBoolean("profiler.spring.webmvc.uri.stat.enable", true);
+        this.uriStatEnable = config.readBoolean("profiler.spring.webmvc.uri.stat.enable", false);
     }
 
     public boolean isUriStatEnable() {

@@ -34,6 +34,4 @@ public interface UriExtractor<T> {
 
     String getUri(T target, String rawUrl);
 
-    String getUri(T target, URI rawUri);
-
 }

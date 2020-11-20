@@ -21,6 +21,6 @@ package com.navercorp.pinpoint.bootstrap.plugin.uri;
  */
 public interface UriStatRecorderFactory {
 
-    <T> UriStatRecorder<T> create(UriExtractor<T> uriExtractor);
+    <T> UriStatRecorder<T> create(UriExtractorService<T> uriExtractorService);
 
 }
