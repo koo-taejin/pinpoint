@@ -44,11 +44,9 @@ public class GrpcUriStatMessageConverter implements MessageConverter<PAgentUriSt
 
     private PAgentUriStat createPAgentUriStat(AgentUriStatData agentUriStatData) {
         long baseTimestamp = agentUriStatData.getBaseTimestamp();
-        int interval = agentUriStatData.getInterval();
 
         PAgentUriStat.Builder builder = PAgentUriStat.newBuilder();
         builder.setTimestamp(baseTimestamp);
-        builder.setInterval(interval);
 
         Collection<EachUriStatData> allUriStatData = agentUriStatData.getAllUriStatData();
         for (EachUriStatData eachUriStatData : allUriStatData) {
@@ -88,6 +86,7 @@ public class GrpcUriStatMessageConverter implements MessageConverter<PAgentUriSt
         long total = uriStatHistogram.getTotal();
         long max = uriStatHistogram.getMax();
 
+        builder.setCount(count);
         builder.setAvg(total / count);
         builder.setMax(max);
 

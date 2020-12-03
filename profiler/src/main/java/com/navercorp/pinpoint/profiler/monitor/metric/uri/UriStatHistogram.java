@@ -23,10 +23,12 @@ import java.util.Arrays;
  */
 public class UriStatHistogram {
 
+    private static int HISTOGRAM_BUCKET_SIZE = UriStatHistogramBucket.values().length;
+
     private int count;
     private long total;
     private long max = 0;
-    private int[] timestampHistogram = new int[10];
+    private int[] timestampHistogram = new int[HISTOGRAM_BUCKET_SIZE];
 
     public void add(long elapsed) {
         count++;
@@ -34,8 +36,8 @@ public class UriStatHistogram {
 
         this.max = Math.max(max, elapsed);
 
-        UriStatHistogramSchema value = UriStatHistogramSchema.getValue(elapsed);
-        timestampHistogram[value.getIndex()] = ++timestampHistogram[value.getIndex()];
+        UriStatHistogramBucket uriStatHistogramBucket = UriStatHistogramBucket.getValue(elapsed);
+        timestampHistogram[uriStatHistogramBucket.getIndex()] = ++timestampHistogram[uriStatHistogramBucket.getIndex()];
     }
 
     private boolean isEmpty() {
