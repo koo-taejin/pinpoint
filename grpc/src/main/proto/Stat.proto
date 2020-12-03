@@ -183,8 +183,9 @@ message PEachUriStat {
 }
 
 message PUriHistogram {
-    int32 count = 1;
-    double avg = 2;
-    int64 max = 3;
-    repeated int32 histogram = 4;
+    int32 bucketVersion = 1;
+    int32 count = 2;
+    double avg = 3;
+    int64 max = 4;
+    repeated int32 histogram = 5;
 }

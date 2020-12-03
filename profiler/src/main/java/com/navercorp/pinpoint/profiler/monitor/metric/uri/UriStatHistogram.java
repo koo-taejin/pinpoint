@@ -25,6 +25,8 @@ public class UriStatHistogram {
 
     private static int HISTOGRAM_BUCKET_SIZE = UriStatHistogramBucket.values().length;
 
+    private static byte BUCKET_VERSION = UriStatHistogramBucket.getBucketVersion();
+
     private int count;
     private long total;
     private long max = 0;
@@ -58,6 +60,10 @@ public class UriStatHistogram {
 
     public int[] getTimestampHistogram() {
         return timestampHistogram;
+    }
+
+    public byte getBucketVersion() {
+        return BUCKET_VERSION;
     }
 
     @Override

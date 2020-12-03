@@ -62,4 +62,7 @@ public enum UriStatHistogramBucket {
         return OVER_8000MS;
     }
 
+    public static byte getBucketVersion() {
+        return 0;
+    }
 }

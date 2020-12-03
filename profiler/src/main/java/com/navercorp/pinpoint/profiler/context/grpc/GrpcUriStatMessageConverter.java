@@ -90,6 +90,7 @@ public class GrpcUriStatMessageConverter implements MessageConverter<PAgentUriSt
         builder.setAvg(total / count);
         builder.setMax(max);
 
+        builder.setBucketVersion(uriStatHistogram.getBucketVersion());
         int[] timestampHistograms = uriStatHistogram.getTimestampHistogram();
         for (int eachTimestampHistogram : timestampHistograms) {
             builder.addHistogram(eachTimestampHistogram);
