@@ -43,12 +43,19 @@ public class SpringWebMvcPlugin implements ProfilerPlugin, TransformTemplateAwar
     public void setup(ProfilerPluginSetupContext context) {
         transformTemplate.transform("org.springframework.web.servlet.FrameworkServlet", FrameworkServletTransform.class);
 
+
         SpringWebMvcConfig config = new SpringWebMvcConfig(context.getConfig());
+
+        System.out.println("=================== config:" + config);
+
         if (config.isUriStatEnable()) {
             UriMappingExtractorProvider uriMappingExtractorProvider = new UriMappingExtractorProvider(
                     SpringWebMvcConstants.SPRING_MVC_URI_EXTRACTOR_TYPE,
                     SpringWebMvcConstants.SPRING_MVC_URI_MAPPING_ATTRIBUTE_KEYS
             );
+
+            System.out.println("=================== uriMappingExtractorProvider:" + uriMappingExtractorProvider);
+
             context.addUriExtractor(uriMappingExtractorProvider);
         }
     }
