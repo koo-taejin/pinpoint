@@ -51,5 +51,7 @@ jobs:
         key: ${{ runner.os }}-node_install-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-node_install-
+    - name: Show MavenWrapper
+      run: ./mvnw -v
     - name: Build with Maven
       run: ./mvnw -B package --file pom.xml
