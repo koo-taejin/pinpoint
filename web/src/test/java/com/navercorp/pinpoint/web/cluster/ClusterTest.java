@@ -27,6 +27,7 @@ import com.navercorp.pinpoint.web.cluster.connection.ClusterConnectionManager;
 import com.navercorp.pinpoint.web.cluster.zookeeper.ZookeeperClusterDataManager;
 import com.navercorp.pinpoint.web.config.WebConfig;
 import com.navercorp.pinpoint.web.util.PinpointWebTestUtils;
+
 import org.apache.curator.test.TestingServer;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
@@ -39,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.SocketUtils;
 
+import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
@@ -86,21 +88,35 @@ public class ClusterTest {
         when(config.getClusterZookeeperRetryInterval()).thenReturn(60000);
         when(config.getClusterZookeeperSessionTimeout()).thenReturn(3000);
 
-        acceptorPort = SocketUtils.findAvailableTcpPort(zookeeperPort);
+        clusterConnectionManager = createClusterConnectionManager(5, config);
+        acceptorPort = clusterConnectionManager.getClusterAcceptor().getBindPort();
         acceptorAddress = DEFAULT_IP + ":" + acceptorPort;
-        when(config.getClusterTcpPort()).thenReturn(acceptorPort);
 
         CLUSTER_NODE_PATH = "/pinpoint-cluster/web/" + acceptorAddress;
         LOGGER.debug("CLUSTER_NODE_PATH:{}", CLUSTER_NODE_PATH);
-
-        clusterConnectionManager = new ClusterConnectionManager(config);
-        clusterConnectionManager.start();
 
         clusterDataManager = new ZookeeperClusterDataManager(config);
         clusterDataManager.start();
 
         List<String> localV4IpList = NetUtils.getLocalV4IpList();
         clusterDataManager.registerWebCluster(acceptorAddress, convertIpListToBytes(localV4IpList, "\r\n"));
+    }
+
+    private static ClusterConnectionManager createClusterConnectionManager(int tryCount, WebConfig config) throws SocketException {
+        for (int i = 0; i < tryCount; i++) {
+            try {
+                LOGGER.warn("createClusterConnectionManager() started. count:{}", i + 1);
+                int acceptorPort = SocketUtils.findAvailableTcpPort(28000);
+                when(config.getClusterTcpPort()).thenReturn(acceptorPort);
+
+                ClusterConnectionManager clusterConnectionManager = new ClusterConnectionManager(config);
+                clusterConnectionManager.start();
+                return clusterConnectionManager;
+            } catch (Exception e) {
+                LOGGER.warn("It looks like that socket bind failed.");
+            }
+        }
+        throw new SocketException("It looks like that socket bind failed.");
     }
 
     @AfterClass
