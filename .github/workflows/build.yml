@@ -67,5 +67,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./mvnw -B package org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        run: ./mvnw -B package org.sonarsource.scanner.maven:sonar-maven-plugin:3.4.1.1168:sonar
 
