@@ -57,7 +57,9 @@
         <module>json-lib</module>
         <module>redis</module>
         <module>redis-lettuce</module>
+<!--
         <module>tomcat</module>
+-->
         <module>thrift</module>
         <module>user</module>
         <module>arcus</module>
@@ -78,7 +80,9 @@
         <module>activemq-client</module>
         <module>cxf</module>
         <module>hystrix</module>
+<!--
         <module>jboss</module>
+-->
         <module>vertx</module>
         <module>resin</module>
         <module>jsp</module>

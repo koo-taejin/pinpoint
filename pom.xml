@@ -202,6 +202,12 @@
         <plugin.frontend.node.version>v10.18.0</plugin.frontend.node.version>
         <plugin.frontend.npm.version>6.13.4</plugin.frontend.npm.version>
         <plugin.frontend.node.install.dir>/node_install/node-${plugin.frontend.node.version}</plugin.frontend.node.install.dir>
+
+
+        <sonar.projectKey>koo-taejin_pinpoint</sonar.projectKey>
+        <sonar.organization>koo-taejin</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
     </properties>
 
     <dependencies>
