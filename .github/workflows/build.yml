@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 7
@@ -25,6 +25,28 @@ jobs:
           echo "JAVA_8_HOME=$JAVA_HOME_8_X64" >> $GITHUB_ENV
           echo "JAVA_9_HOME=$JAVA_HOME_9_0_7_X64" >> $GITHUB_ENV
           echo "JAVA_HOME=$JAVA_HOME_8_X64" >> $GITHUB_ENV
+      - name: Java Environment
+          run: env | grep '^JAVA'
+      - name: Cache Maven packages
+          uses: actions/cache@v2
+            with:
+              path: ~/.m2
+                key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+                restore-keys: ${{ runner.os }}-m2
+      - name: Cache node modules
+          uses: actions/cache@v2
+          with:
+            path: '**/node_modules'
+            key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+            restore-keys: |
+              ${{ runner.os }}-node-modules-
+      - name: Cache node install
+          uses: actions/cache@v2
+          with:
+            path: 'node_install'
+            key: ${{ runner.os }}-node_install-${{ hashFiles('**/pom.xml') }}
+            restore-keys: |
+              ${{ runner.os }}-node_install-
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
