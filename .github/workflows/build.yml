@@ -29,10 +29,10 @@ jobs:
         run: env | grep '^JAVA'
       - name: Cache Maven packages
         uses: actions/cache@v2
-          with:
-            path: ~/.m2
-              key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-              restore-keys: ${{ runner.os }}-m2
+        with:
+          path: ~/.m2
+            key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+            restore-keys: ${{ runner.os }}-m2
       - name: Cache node modules
         uses: actions/cache@v2
         with:
