@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.navercorp.pinpoint.connectionmap.common.proto";
+option java_outer_classname = "NetworkMapMessageProto";
+
+option go_package = "pinpoint-network-map/api/proto/v1";
+
+package v1;
+
+enum ConnectionType {
+    TCP = 0;
+    UDP = 1;
+}
+
+enum ConnectionFamily {
+    AF_INET_4 = 0;
+    AF_INET_6 = 1;
+}
+
+enum Direction {
+    INCOMING = 0;
+    OUTGOING = 1;
+    LOCAL = 2;
+}
+
+message PConnectionStatsMessage {
+    repeated PConnectionStats connectionStats = 1;
+}
+
+message PConnectionStats {
+    ConnectionType type = 1;
+    ConnectionFamily family = 2;
+
+    bytes srcIp = 3;
+    int32 srcPort = 4;
+    bytes dstIp = 5;
+    int32 dstPort = 6;
+
+    Direction direction = 7;
+
+    int32 pid = 8;
+
+    int64 monotonicSentBytes = 9;
+    int64 sentBytes = 10;
+
+    int64 monotonicRecvBytes = 11;
+    int64 recvBytes = 12;
+
+    int32 monotonicRetransmits = 13;
+    int32 lastRetransmits = 14;
+
+
+    int64 lastUpdateEpoch = 15;
+    int32 netNs = 16;
+}
+
+message PLocalAddressesMessage {
+    repeated PLocalIp localIpList = 1;
+}
+
+message PLocalIp {
+    bytes localIp = 1;
+}
+
+message PLocalPidsMessage {
+    repeated int32 pids = 1;
+}
+
+message PResult {
+    bool success = 1;
+    string message = 2;
+}
+

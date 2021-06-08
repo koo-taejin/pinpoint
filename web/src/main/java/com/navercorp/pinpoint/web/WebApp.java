@@ -17,6 +17,8 @@
 package com.navercorp.pinpoint.web;
 
 import com.navercorp.pinpoint.common.server.util.ServerBootLogger;
+import com.navercorp.pinpoint.connectionmap.web.ConnectionMapWebApp;
+
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
@@ -33,7 +35,7 @@ public class WebApp {
 
     public static void main(String[] args) {
         try {
-            WebStarter starter = new WebStarter(WebApp.class, WebServerConfig.class, WebMvcConfig.class, PinpointBasicLoginConfig.class);
+            WebStarter starter = new WebStarter(WebApp.class, WebServerConfig.class, WebMvcConfig.class, PinpointBasicLoginConfig.class, ConnectionMapWebApp.class);
             starter.start(args);
         } catch (Exception exception) {
             logger.error("[WebApp] could not launch app.", exception);

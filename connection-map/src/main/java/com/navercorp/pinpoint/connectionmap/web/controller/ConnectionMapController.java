@@ -1,0 +1,83 @@
+/*
+ * Copyright 2021 NAVER Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.navercorp.pinpoint.connectionmap.web.controller;
+
+import com.navercorp.pinpoint.connectionmap.common.vo.ConnectionStatVo;
+import com.navercorp.pinpoint.connectionmap.web.map.ConnectionMap;
+import com.navercorp.pinpoint.connectionmap.web.service.ConnectionMapService;
+import com.navercorp.pinpoint.connectionmap.web.service.NetworkMapLocalService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.time.temporal.ValueRange;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * @author Taejin Koo
+ */
+@Controller
+public class ConnectionMapController {
+
+    private static final String DEFAULT_SEARCH_DEPTH = "2";
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private ConnectionMapService connectionMapService;
+
+    @Autowired
+    private NetworkMapLocalService networkMapService;
+
+    @RequestMapping(value = "/getConnectionMapData", method = RequestMethod.GET)
+    @ResponseBody
+    public ConnectionMap getServerMapData(
+            @RequestParam("agentId") String agentId,
+            @RequestParam("from") long from,
+            @RequestParam("to") long to,
+            @RequestParam(value = "callerRange", defaultValue = DEFAULT_SEARCH_DEPTH) int callerRange,
+            @RequestParam(value = "calleeRange", defaultValue = DEFAULT_SEARCH_DEPTH) int calleeRange) {
+        ValueRange range = ValueRange.of(from, to);
+
+        logger.debug("getConnectionMapData() started.");
+        ConnectionMap connectionMap = connectionMapService.selectMap(agentId, range, callerRange, calleeRange);
+        logger.debug("getConnectionMapData() completed.");
+        return connectionMap;
+    }
+
+    @RequestMapping(value = "/getLocalMap", method = RequestMethod.GET, params = {"agentId", "from", "to"})
+    @ResponseBody
+    public List<ConnectionStatVo> getLocalMap(
+            @RequestParam("agentId") String agentId,
+            @RequestParam("from") long from,
+            @RequestParam("to") long to) {
+        ValueRange range = ValueRange.of(from, to);
+
+        logger.debug("getLocalMap() started.");
+        networkMapService.selectLocalMap(agentId, 1, range);
+        logger.debug("getLocalMap() completed.");
+        return Collections.emptyList();
+    }
+
+}

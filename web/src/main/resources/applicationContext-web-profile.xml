@@ -19,4 +19,14 @@
         <import resource="classpath:batch/applicationContext-batch-schedule.xml"/>
     </beans>
 
+    <beans profile="connectionmap">
+        <bean id="timeWindowFunction" class="com.navercorp.pinpoint.web.util.TimeWindowFunction"></bean>
+        <bean id="connectionMapTableDescriptorConfig" class="com.navercorp.pinpoint.connectionmap.common.hbase.ConnectionMapTableDescriptorConfig"/>
+
+        <bean id="timeWindowFactory" class="com.navercorp.pinpoint.connectionmap.web.util.TimeWindowFactory">
+            <constructor-arg index="0" ref="timeWindowFunction"/>
+        </bean>
+    </beans>
+
+
 </beans>

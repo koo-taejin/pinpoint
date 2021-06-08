@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
     <!-- for IDE(intellij profile detection) -->
     <beans profile="local">
 
@@ -9,6 +9,72 @@
 
     <beans profile="release">
 
+    </beans>
+
+    <beans profile="connectionmap">
+
+        <bean id="connectionStatReceiverConfig" class="com.navercorp.pinpoint.collector.config.ConnectionStatReceiverConfiguration">
+        </bean>
+
+        <bean id="grpcConnectionStatWorkerExecutor" class="com.navercorp.pinpoint.collector.receiver.ExecutorFactoryBean" parent="abstractReceiverExecutorFactoryBean">
+            <property name="rejectedExecutionHandler" ref="abortPolicy"/>
+            <property name="corePoolSize" value="#{connectionStatReceiverConfig.grpcWorkerExecutorThreadSize}"/>
+            <property name="maxPoolSize" value="#{connectionStatReceiverConfig.grpcWorkerExecutorThreadSize}"/>
+            <property name="queueCapacity" value="#{connectionStatReceiverConfig.grpcWorkerExecutorQueueSize}"/>
+            <property name="threadNamePrefix" value="Pinpoint-GrpcConnectionStat-Worker-"/>
+            <property name="registry" value="#{connectionStatReceiverConfig.grpcWorkerExecutorMonitorEnable ? metricRegistry : null}"/>
+        </bean>
+
+        <bean id="grpcConnectionStatScheduler" class="org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean">
+            <property name="poolSize" value="#{connectionStatReceiverConfig.grpcStreamSchedulerThreadSize}"/>
+            <property name="threadNamePrefix" value="Pinpoint-GrpcConnectionStat-StreamExecutor-Scheduler-"/>
+            <property name="daemon" value="true"/>
+            <property name="waitForTasksToCompleteOnShutdown" value="true"/>
+            <property name="awaitTerminationSeconds" value="10"/>
+        </bean>
+
+        <bean id="networkConnectionStreamExecutorInterceptor" class="com.navercorp.pinpoint.collector.receiver.grpc.service.StreamExecutorServerInterceptorFactory">
+            <constructor-arg index="0" ref="grpcConnectionStatWorkerExecutor"/>
+            <constructor-arg index="1" value="#{connectionStatReceiverConfig.grpcStreamCallInitRequestCount}"/>
+            <constructor-arg index="2" ref="grpcConnectionStatScheduler"/>
+            <constructor-arg index="3" value="#{connectionStatReceiverConfig.grpcStreamSchedulerPeriodMillis}"/>
+            <constructor-arg index="4" value="#{connectionStatReceiverConfig.grpcStreamSchedulerRecoveryMessageCount}"/>
+            <constructor-arg index="5" value="#{connectionStatReceiverConfig.grpcStreamIdleTimeout}"/>
+        </bean>
+
+        <bean id="serverRequestFactoryFunction" class="com.navercorp.pinpoint.collector.util.ServerRequestFactoryFunction">
+            <constructor-arg index="0" ref="serverRequestFactory"/>
+        </bean>
+
+        <bean id="connectionStatServiceFactory" class="com.navercorp.pinpoint.collector.receiver.grpc.service.ConnectionStatServiceFactory">
+            <property name="serverRequestFactory" ref="serverRequestFactory"/>
+            <property name="connectionStatHandler" ref="connectionStatHandler"/>
+        </bean>
+
+        <util:list id="connectionStatServiceList" value-type="io.grpc.ServerServiceDefinition">
+            <ref bean="connectionStatServiceFactory"/>
+        </util:list>
+
+        <bean id="connectionStatServerExecutor" class="com.navercorp.pinpoint.collector.receiver.ExecutorFactoryBean" parent="abstractReceiverExecutorFactoryBean">
+            <property name="corePoolSize" value="#{connectionStatReceiverConfig.grpcServerExecutorThreadSize}"/>
+            <property name="maxPoolSize" value="#{connectionStatReceiverConfig.grpcServerExecutorThreadSize}"/>
+            <property name="queueCapacity" value="#{connectionStatReceiverConfig.grpcServerExecutorQueueSize}"/>
+            <property name="threadNamePrefix" value="Pinpoint-ConnectionStat-Server-"/>
+            <property name="registry" value="#{connectionStatReceiverConfig.grpcServerExecutorMonitorEnable ? metricRegistry : null}"/>
+        </bean>
+
+        <bean id="grpcNetworkConnectionReceiver" class="com.navercorp.pinpoint.collector.receiver.grpc.GrpcReceiver">
+            <property name="bindIp" value="#{connectionStatReceiverConfig.grpcBindIp}"/>
+            <property name="bindPort" value="#{connectionStatReceiverConfig.grpcBindPort}"/>
+            <property name="addressFilter" ref="addressFilter"/>
+            <property name="bindableServiceList" ref="connectionStatServiceList"/>
+            <property name="serverInterceptorList" ref="connectionStatInterceptorList"/>
+            <property name="transportFilterList" ref="serverTransportFilterList"/>
+            <property name="channelzRegistry" ref="channelzRegistry"/>
+            <property name="executor" ref="connectionStatServerExecutor"/>
+            <property name="enable" value="#{connectionStatReceiverConfig.isGrpcEnable()}"/>
+            <property name="serverOption" value="#{connectionStatReceiverConfig.getGrpcServerOption()}"/>
+        </bean>
     </beans>
 
 </beans>

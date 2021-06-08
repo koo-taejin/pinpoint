@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "v1/Message.proto";
+
+option java_multiple_files = true;
+option java_package = "com.navercorp.pinpoint.connectionmap.common.proto";
+option java_outer_classname = "NetworkMapServiceProto";
+
+option go_package = "pinpoint-network-map/api/proto/v1";
+
+package v1;
+
+service NetworkConnection {
+    rpc SendConnectionStatsMessage (stream PConnectionStatsMessage)  returns (google.protobuf.Empty) {
+    }
+
+    rpc RequestPLocalAddressesMessage (PLocalAddressesMessage) returns (PResult) {
+    }
+
+    rpc RequestPLocalPidsMessage (PLocalPidsMessage) returns (PResult) {
+    }
+
+}
