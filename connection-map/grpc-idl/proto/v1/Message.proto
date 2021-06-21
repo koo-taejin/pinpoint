@@ -25,6 +25,10 @@ enum Direction {
 }
 
 message PConnectionStatsMessage {
+    map<int64, PConnectionStatsCollection> connectionStatsCollections = 1;
+}
+
+message PConnectionStatsCollection {
     repeated PConnectionStats connectionStats = 1;
 }
 

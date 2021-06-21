@@ -71,6 +71,16 @@ public class ConnectionStatHandler {
         final Header header = ServerContext.getAgentInfo(current);
 
         acceptedTimeService.accept();
+//        PConnectionStatsMessage
+
+        if (message instanceof PConnectionStatsMessage) {
+            PConnectionStatsMessage pConnectionStatsMessage = (PConnectionStatsMessage) message;
+
+
+
+            ((PConnectionStatsMessage) message).getConnectionStatsCollectionsMap();
+
+        }
 
         if (message instanceof PConnectionStatsMessage) {
             List<PConnectionStats> connectionStatsList = ((PConnectionStatsMessage) message).getConnectionStatsList();
