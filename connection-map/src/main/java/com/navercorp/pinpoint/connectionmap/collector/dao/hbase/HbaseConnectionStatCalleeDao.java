@@ -19,7 +19,6 @@ package com.navercorp.pinpoint.connectionmap.collector.dao.hbase;
 import com.navercorp.pinpoint.common.buffer.AutomaticBuffer;
 import com.navercorp.pinpoint.common.buffer.Buffer;
 import com.navercorp.pinpoint.common.hbase.HbaseOperations2;
-import com.navercorp.pinpoint.common.server.util.AcceptedTimeService;
 import com.navercorp.pinpoint.common.util.BytesUtils;
 import com.navercorp.pinpoint.common.util.TimeUtils;
 import com.navercorp.pinpoint.connectionmap.collector.dao.ConnectionStatCalleeDao;
@@ -47,12 +46,9 @@ public class HbaseConnectionStatCalleeDao implements ConnectionStatCalleeDao {
 
     private final ConnectionMapTableDescriptor<ConnectionMapHbaseColumnFamily.ConnectionStatCallee> descriptor;
 
-    private final AcceptedTimeService acceptedTimeService;
-
-    public HbaseConnectionStatCalleeDao(HbaseOperations2 hbaseTemplate, ConnectionMapTableDescriptor<ConnectionMapHbaseColumnFamily.ConnectionStatCallee> descriptor, AcceptedTimeService acceptedTimeService) {
+    public HbaseConnectionStatCalleeDao(HbaseOperations2 hbaseTemplate, ConnectionMapTableDescriptor<ConnectionMapHbaseColumnFamily.ConnectionStatCallee> descriptor) {
         this.hbaseTemplate = Objects.requireNonNull(hbaseTemplate, "hbaseTemplate");
         this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
-        this.acceptedTimeService = Objects.requireNonNull(acceptedTimeService, "acceptedTimeService");
     }
 
     @Override
@@ -70,7 +66,7 @@ public class HbaseConnectionStatCalleeDao implements ConnectionStatCalleeDao {
     }
 
     private byte[] createRowKey(ConnectionStatVo connectionStat) {
-        long acceptedTime = acceptedTimeService.getAcceptedTime();
+        long timestamp = connectionStat.getTimestamp();
 
         InetFamily inetFamily = connectionStat.getInetFamily();
         if (inetFamily == null) {
@@ -88,7 +84,7 @@ public class HbaseConnectionStatCalleeDao implements ConnectionStatCalleeDao {
         Offset offset = new Offset(0);
         rowKey[offset.get()] = inetFamily.getByteNumber();
         BytesUtils.writeBytes(rowKey, offset.addAndGet(1), srcIp);
-        BytesUtils.writeLong(TimeUtils.reverseTimeMillis(acceptedTime), rowKey, offset.addAndGet(srcIpSize));
+        BytesUtils.writeLong(TimeUtils.reverseTimeMillis(timestamp), rowKey, offset.addAndGet(srcIpSize));
 
         return rowKey;
     }

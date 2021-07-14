@@ -32,31 +32,39 @@ message PConnectionStatsCollection {
     repeated PConnectionStats connectionStats = 1;
 }
 
+enum ConnectionState {
+    OPEN = 0;
+	CLOSED = 1;
+	UNKNOWN = 2;
+}
+
 message PConnectionStats {
     ConnectionType type = 1;
     ConnectionFamily family = 2;
+    ConnectionState state = 3;
 
-    bytes srcIp = 3;
-    int32 srcPort = 4;
-    bytes dstIp = 5;
-    int32 dstPort = 6;
+    bytes srcIp = 4;
+    int32 srcPort = 5;
+    bytes dstIp = 6;
+    int32 dstPort = 7;
 
-    Direction direction = 7;
+    Direction direction = 8;
 
-    int32 pid = 8;
+    int32 pid = 9;
+    bytes pidName = 10;
 
-    int64 monotonicSentBytes = 9;
-    int64 sentBytes = 10;
+    int64 monotonicSentBytes = 11;
+    int64 sentBytes = 12;
 
-    int64 monotonicRecvBytes = 11;
-    int64 recvBytes = 12;
+    int64 monotonicRecvBytes = 13;
+    int64 recvBytes = 14;
 
-    int32 monotonicRetransmits = 13;
-    int32 lastRetransmits = 14;
+    int32 monotonicRetransmits = 15;
+    int32 lastRetransmits = 16;
 
+    int64 lastUpdateEpoch = 17;
+    int32 netNs = 18;
 
-    int64 lastUpdateEpoch = 15;
-    int32 netNs = 16;
 }
 
 message PLocalAddressesMessage {

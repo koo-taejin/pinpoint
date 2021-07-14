@@ -37,11 +37,11 @@ public class ConnectionStatConverter {
     public ConnectionStatConverter() {
     }
 
-    public ConnectionStatVo convert(PConnectionStats pConnectionStats, Header header) {
-        return newConnectionStatVo(pConnectionStats, header);
+    public ConnectionStatVo convert(PConnectionStats pConnectionStats, long timestamp, Header header) {
+        return newConnectionStatVo(pConnectionStats, timestamp, header);
     }
 
-    private ConnectionStatVo newConnectionStatVo(PConnectionStats pConnectionStats, Header header) {
+    private ConnectionStatVo newConnectionStatVo(PConnectionStats pConnectionStats, long timestamp, Header header) {
         ConnectionStatVo.Builder builder = new ConnectionStatVo.Builder();
 
         String agentId = header.getAgentId();
@@ -85,6 +85,8 @@ public class ConnectionStatConverter {
         builder.pid(pid);
         int netNs = pConnectionStats.getNetNs();
         builder.netNs(netNs);
+
+        builder.timestamp(timestamp);
 
         return builder.build();
     }

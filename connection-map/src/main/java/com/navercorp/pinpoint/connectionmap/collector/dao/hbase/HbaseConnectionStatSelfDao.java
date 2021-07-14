@@ -49,12 +49,9 @@ public class HbaseConnectionStatSelfDao implements ConnectionStatSelfDao {
 
     private final ConnectionMapTableDescriptor<ConnectionMapHbaseColumnFamily.ConnectionStatSelf> descriptor;
 
-    private final AcceptedTimeService acceptedTimeService;
-
-    public HbaseConnectionStatSelfDao(HbaseOperations2 hbaseTemplate, ConnectionMapTableDescriptor<ConnectionMapHbaseColumnFamily.ConnectionStatSelf> descriptor, AcceptedTimeService acceptedTimeService) {
+    public HbaseConnectionStatSelfDao(HbaseOperations2 hbaseTemplate, ConnectionMapTableDescriptor<ConnectionMapHbaseColumnFamily.ConnectionStatSelf> descriptor) {
         this.hbaseTemplate = Objects.requireNonNull(hbaseTemplate, "hbaseTemplate");
         this.descriptor = Objects.requireNonNull(descriptor, "descriptor");
-        this.acceptedTimeService = Objects.requireNonNull(acceptedTimeService, "acceptedTimeService");
     }
 
     @Override
@@ -72,7 +69,7 @@ public class HbaseConnectionStatSelfDao implements ConnectionStatSelfDao {
     }
 
     private byte[] createRowKey(ConnectionStatVo connectionStat) {
-        long acceptedTime = acceptedTimeService.getAcceptedTime();
+        long timestamp = connectionStat.getTimestamp();
 
         final byte[] bAgentId = Bytes.toBytes(connectionStat.getAgentId());
 
@@ -82,7 +79,7 @@ public class HbaseConnectionStatSelfDao implements ConnectionStatSelfDao {
         byte[] rowKey = new byte[HbaseTableConstants.AGENT_ID_MAX_LEN + BytesUtils.INT_BYTE_LENGTH + LONG_BYTE_LENGTH];
         BytesUtils.writeBytes(rowKey, offset.get(), bAgentId);
         BytesUtils.writeInt(pid, rowKey, offset.addAndGet(HbaseTableConstants.AGENT_ID_MAX_LEN));
-        BytesUtils.writeLong(TimeUtils.reverseTimeMillis(acceptedTime), rowKey, offset.addAndGet(BytesUtils.INT_BYTE_LENGTH));
+        BytesUtils.writeLong(TimeUtils.reverseTimeMillis(timestamp), rowKey, offset.addAndGet(BytesUtils.INT_BYTE_LENGTH));
         return rowKey;
     }
 

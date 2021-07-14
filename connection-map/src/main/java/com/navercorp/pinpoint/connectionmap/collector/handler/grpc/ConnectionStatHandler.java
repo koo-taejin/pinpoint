@@ -21,6 +21,7 @@ import com.navercorp.pinpoint.connectionmap.collector.service.ConnectionStatServ
 import com.navercorp.pinpoint.connectionmap.collector.service.LocalAddressService;
 import com.navercorp.pinpoint.connectionmap.collector.vo.converter.ConnectionStatConverter;
 import com.navercorp.pinpoint.connectionmap.common.proto.PConnectionStats;
+import com.navercorp.pinpoint.connectionmap.common.proto.PConnectionStatsCollection;
 import com.navercorp.pinpoint.connectionmap.common.proto.PConnectionStatsMessage;
 import com.navercorp.pinpoint.connectionmap.common.proto.PLocalAddressesMessage;
 import com.navercorp.pinpoint.connectionmap.common.vo.ConnectionStatVo;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -49,11 +51,11 @@ public class ConnectionStatHandler {
 
     private final ConnectionStatConverter converter = new ConnectionStatConverter();
 
-    private  ConnectionStatService connectionStatService;
+    private ConnectionStatService connectionStatService;
 
-    private  LocalAddressService localAddressService;
+    private LocalAddressService localAddressService;
 
-    private  AcceptedTimeService acceptedTimeService;
+    private AcceptedTimeService acceptedTimeService;
 
 
     public ConnectionStatHandler(ConnectionStatService connectionStatService, LocalAddressService localAddressService, AcceptedTimeService acceptedTimeService) {
@@ -71,22 +73,19 @@ public class ConnectionStatHandler {
         final Header header = ServerContext.getAgentInfo(current);
 
         acceptedTimeService.accept();
-//        PConnectionStatsMessage
 
         if (message instanceof PConnectionStatsMessage) {
             PConnectionStatsMessage pConnectionStatsMessage = (PConnectionStatsMessage) message;
+            Map<Long, PConnectionStatsCollection> connectionStatsCollectionsMap = pConnectionStatsMessage.getConnectionStatsCollectionsMap();
 
-
-
-            ((PConnectionStatsMessage) message).getConnectionStatsCollectionsMap();
-
-        }
-
-        if (message instanceof PConnectionStatsMessage) {
-            List<PConnectionStats> connectionStatsList = ((PConnectionStatsMessage) message).getConnectionStatsList();
-            for (PConnectionStats pConnectionStats : connectionStatsList) {
-                ConnectionStatVo connectionStatVo = converter.convert(pConnectionStats, header);
-                connectionStatService.insert(connectionStatVo);
+            for (Map.Entry<Long, PConnectionStatsCollection> entry : connectionStatsCollectionsMap.entrySet()) {
+                Long timestamp = entry.getKey();
+                PConnectionStatsCollection value = entry.getValue();
+                List<PConnectionStats> connectionStatsList = value.getConnectionStatsList();
+                for (PConnectionStats pConnectionStats : connectionStatsList) {
+                    ConnectionStatVo connectionStatVo = converter.convert(pConnectionStats, timestamp, header);
+                    connectionStatService.insert(connectionStatVo);
+                }
             }
         } else if (message instanceof PLocalAddressesMessage) {
             LocalAddressesVo localAddressesVo = converter.convert((PLocalAddressesMessage) message, header);
