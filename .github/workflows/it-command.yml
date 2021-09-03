@@ -38,6 +38,9 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: Build with Maven
         run: ./mvnw --batch-mode clean install -DskipTests -pl agent -am -f pom.xml
+      - name: Build Plugin Bom
+        working-directory: ./plugins/bom
+        run: ../../mvnw clean install
       - name: Integration Test
         working-directory: ./plugins-it
         run: ../mvnw --batch-mode clean install -Pit-module -pl ${{ github.event.client_payload.slash_command.args.all }}
