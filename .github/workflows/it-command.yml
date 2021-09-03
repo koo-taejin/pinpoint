@@ -41,6 +41,9 @@ jobs:
       - name: Build Plugin Bom
         working-directory: ./plugins/bom
         run: ../../mvnw clean install
+      - name: Build plugin IT utils
+        working-directory: ./plugins-it
+        run: ../mvnw clean install -Pit-module -pl plugin-it-utils
       - name: Integration Test
         working-directory: ./plugins-it
         run: ../mvnw --batch-mode clean install -Pit-module -pl ${{ github.event.client_payload.slash_command.args.all }}
