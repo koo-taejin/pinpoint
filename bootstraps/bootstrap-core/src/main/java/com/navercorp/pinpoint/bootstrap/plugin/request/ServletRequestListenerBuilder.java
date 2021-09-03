@@ -164,6 +164,11 @@ public class ServletRequestListenerBuilder<REQ> {
         if (CollectionUtils.isEmpty(recordRequestHeaders)) {
             return new BypassServerHeaderRecorder<>();
         }
+
+        if (AllServerHeaderRecorder.isRecordAllHeaders(recordRequestHeaders)) {
+            return new AllServerHeaderRecorder<>(requestAdaptor);
+        }
+
         return new DefaultServerHeaderRecorder<>(requestAdaptor, recordRequestHeaders);
     }
 
