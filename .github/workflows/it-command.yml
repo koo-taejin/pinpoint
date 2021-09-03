@@ -37,7 +37,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build with Maven
-        run: ./mvnw --batch-mode clean install -DskipTests -pl -web -f pom.xml
+        run: ./mvnw --batch-mode -Pit-module -DskipTests clean install
       - name: Integration Test
         working-directory: ./plugins-it
         run: ../mvnw --batch-mode clean install -Pit-module -pl ${{ github.event.client_payload.slash_command.args.all }}
