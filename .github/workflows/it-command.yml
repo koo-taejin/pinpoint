@@ -55,3 +55,14 @@ jobs:
       - name: Integration Test
         working-directory: ./plugins-it
         run: ../mvnw --batch-mode clean install -Pit-module -pl ${{ github.event.client_payload.slash_command.args.all }}
+      - name: Reports 
+        id: vars
+        working-directory: ./plugins-it
+        run: echo ::set-output name=report::"$(cat ./*/target/failsafe-reports/*.txt | grep ^Tests)"
+      - name: Update  comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
+          body: |
+            > ${{ steps.vars.outputs.report }}
+        
