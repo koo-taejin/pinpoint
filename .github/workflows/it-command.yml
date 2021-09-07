@@ -10,6 +10,15 @@ jobs:
       PR_NUMBER: ${{ github.event.client_payload.github.payload.issue.number }}
       PR_P: ${{ github.event.issue.number }}
     steps:
+     - name: Create URL to the run output
+        id: vars
+        run: echo ::set-output name=run-url::https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID      
+    - name: Update success comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
+          body: |
+            > Action has been started. [Click here to see the action](${{ steps.vars.outputs.run-url }})
       - name: Checkout
         uses: actions/checkout@v2
         with:
@@ -56,7 +65,7 @@ jobs:
         working-directory: ./plugins-it
         run: ../mvnw --batch-mode clean install -Pit-module -pl ${{ github.event.client_payload.slash_command.args.all }}
       - name: Reports 
-        id: vars
+        id: vars1
         working-directory: ./plugins-it
         run: echo ::set-output name=report::"$(cat ./*/target/failsafe-reports/*.txt | grep ^Tests)"
       - name: Update  comment
@@ -64,5 +73,5 @@ jobs:
         with:
           comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
           body: |
-            > ${{ steps.vars.outputs.report }}
+            > ${{ steps.vars1.outputs.report }}
         
