@@ -64,11 +64,11 @@ jobs:
       - name: Whole Integration Test
         if: github.event.client_payload.slash_command.args.all == ''
         working-directory: ./plugins-it
-        run: ../mvnw --batch-mode clean install -Pit-module 
+        run: ../mvnw --batch-mode clean install -Pit-module  -Dmaven.test.failure.ignore=true
       - name: Integration Test
         if: github.event.client_payload.slash_command.args.all != ''
         working-directory: ./plugins-it
-        run: ../mvnw --batch-mode clean install -Pit-module -pl ${{ github.event.client_payload.slash_command.args.all }}
+        run: ../mvnw --batch-mode clean install -Pit-module -pl ${{ github.event.client_payload.slash_command.args.all }} -Dmaven.test.failure.ignore=true
       - name: Reports 
         id: vars1
         working-directory: ./plugins-it
