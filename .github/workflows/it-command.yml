@@ -68,6 +68,8 @@ jobs:
         id: vars1
         working-directory: ./plugins-it
         run: echo ::set-output name=report::"$(cat ./*/target/failsafe-reports/*.txt | grep ^Tests)"
+      - name: Echo 
+        run: echo ${{ steps.vars1.outputs.report }} 
       - name: Update  comment
         uses: peter-evans/create-or-update-comment@v1
         with:
