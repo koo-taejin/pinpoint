@@ -30,7 +30,7 @@ public class ClusterConfig {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Value("${cluster.enable}")
-    private boolean clusterEnable;
+    private boolean   clusterEnable;
 
     @Value("${cluster.zookeeper.address:}")
     private String clusterAddress;
