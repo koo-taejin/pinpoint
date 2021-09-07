@@ -51,7 +51,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node_install-
       - name: Build with Maven
-        run: ./mvnw --batch-mode -Pit-module -DskipTests clean install -pl -web,-flink
+        run: ./mvnw --batch-mode -Pit-module -DskipTests clean install -pl -web,-flink,-batch
       - name: Integration Test
         working-directory: ./plugins-it
         run: ../mvnw --batch-mode clean install -Pit-module -pl ${{ github.event.client_payload.slash_command.args.all }}
