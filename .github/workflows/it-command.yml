@@ -73,8 +73,6 @@ jobs:
           report="${report//$'\n'/'%0A'}"
           report="${report//$'\r'/'%0D'}"
           echo ::set-output name=report::"$report"
-      - name: Echo 
-        run: echo ${{ steps.vars1.outputs.report }} 
       - name: Update  comment
         uses: peter-evans/create-or-update-comment@v1
         with:
