@@ -67,7 +67,12 @@ jobs:
       - name: Reports 
         id: vars1
         working-directory: ./plugins-it
-        run: echo ::set-output name=report::"$(cat ./*/target/failsafe-reports/*.txt | grep ^Tests)"
+        run: |
+          report=$(cat ./*/target/failsafe-reports/*.txt | grep ^Tests)
+          report="${report//'%'/'%25'}"
+          report="${report//$'\n'/'%0A'}"
+          report="${report//$'\r'/'%0D'}"
+          echo ::set-output name=report::"$report"
       - name: Echo 
         run: echo ${{ steps.vars1.outputs.report }} 
       - name: Update  comment
