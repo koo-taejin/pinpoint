@@ -28,6 +28,7 @@ jobs:
           echo "JAVA_8_HOME=$JAVA_HOME_8_X64" >> $GITHUB_ENV
           echo "JAVA_9_HOME=$JAVA_HOME_9_0_7_X64" >> $GITHUB_ENV
           echo "JAVA_HOME=$JAVA_HOME_8_X64" >> $GITHUB_ENV
+          docker pull testcontainers/ryuk:0.3.0
       - name: Java Environment
         run: env | grep '^JAVA'
       - name: Cache Maven packages
