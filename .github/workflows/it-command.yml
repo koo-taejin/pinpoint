@@ -10,10 +10,10 @@ jobs:
       PR_NUMBER: ${{ github.event.client_payload.github.payload.issue.number }}
       PR_P: ${{ github.event.issue.number }}
     steps:
-     - name: Create URL to the run output
+      - name: Create URL to the run output
         id: vars
         run: echo ::set-output name=run-url::https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID      
-    - name: Update success comment
+      - name: Update success comment
         uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
