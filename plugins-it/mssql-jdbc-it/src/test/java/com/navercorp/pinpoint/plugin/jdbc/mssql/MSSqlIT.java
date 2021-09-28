@@ -105,6 +105,8 @@ public class MSSqlIT extends DataBaseTestCase {
         Assume.assumeTrue("Docker not enabled", DockerClientFactory.instance().isDockerAvailable());
         mssqlserver.start();
 
+
+
         setJdbcUrl(mssqlserver.getJdbcUrl());
         setUserName(mssqlserver.getUsername());
         setPassWord(mssqlserver.getPassword());
