@@ -106,7 +106,7 @@ public abstract class GrpcITBase {
         verifier.verifyTrace(clientCallStartEvent(server));
         verifier.verifyTrace(event("GRPC_INTERNAL", "io.grpc.internal.ClientCallImpl$ClientStreamListenerImpl()"));
 
-        verifier.verifyTrace(createServerRootTrace(server));
+        verifier.awaitTrace(createServerRootTrace(server), 10, 500);
 
         String streacmCreatedMethodDescritor = "io.grpc.internal.ServerImpl$ServerTransportListenerImpl.streamCreated(io.grpc.internal.ServerStream, java.lang.String, io.grpc.Metadata)";
         verifier.verifyTrace(event("GRPC_SERVER_INTERNAL", streacmCreatedMethodDescritor));
