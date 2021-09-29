@@ -29,6 +29,7 @@ import io.grpc.stub.StreamObserver;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
@@ -166,9 +167,9 @@ public class HelloWorldStreamServer implements HelloWorldServer {
     }
 
     @PreDestroy
-    public void stop() {
+    public void stop() throws InterruptedException {
         if (server != null) {
-            server.shutdown();
+            server.shutdown().awaitTermination(5, TimeUnit.SECONDS);
         }
     }
 

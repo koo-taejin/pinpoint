@@ -27,6 +27,7 @@ import io.grpc.stub.StreamObserver;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -59,16 +60,19 @@ public class HelloWorldSimpleServer implements HelloWorldServer {
             public void run() {
                 // Use stderr here since the logger may have been reset by its JVM shutdown hook.
                 System.err.println("*** shutting down gRPC server since JVM is shutting down");
-                HelloWorldSimpleServer.this.stop();
+                try {
+                    HelloWorldSimpleServer.this.stop();
+                } catch (InterruptedException e) {
+                }
                 System.err.println("*** server shut down");
             }
         });
     }
 
     @PreDestroy
-    public void stop() {
+    public void stop() throws InterruptedException {
         if (server != null) {
-            server.shutdown();
+            server.shutdown().awaitTermination(5, TimeUnit.SECONDS);
         }
     }
 
