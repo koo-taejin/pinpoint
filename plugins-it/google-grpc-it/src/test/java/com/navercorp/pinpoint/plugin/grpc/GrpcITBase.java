@@ -55,7 +55,7 @@ public abstract class GrpcITBase {
 
             assertTrace(server, verifier);
 
-            verifier.awaitTraceCount(getExpectedRequestResponseTestTraceCount(), 20, 3000);
+            verifier.awaitTraceCount(getExpectedRequestResponseTestTraceCount(), 20, 10000);
             verifier.verifyTraceCount(getExpectedRequestResponseTestTraceCount());
         } finally {
             clearResources(client, server);
