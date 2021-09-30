@@ -16,10 +16,16 @@
 
 package com.navercorp.pinpoint.profiler.context;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author Woonduk Kang(emeroad)
  */
 public class DefaultReference<V> implements Reference<V> {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private V value;
 
     @Override
@@ -30,6 +36,11 @@ public class DefaultReference<V> implements Reference<V> {
 
     @Override
     public void set(V value) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("\tset:{}", value);
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            logger.debug("\tat:{}", stackTrace.toString());
+        }
         this.value = value;
     }
 
