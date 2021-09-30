@@ -58,6 +58,8 @@ public abstract class GrpcITBase {
             verifier.awaitTraceCount(getExpectedRequestResponseTestTraceCount(), 20, 10000);
 
             verifier.printCache();
+            verifier.printMethod();
+
             verifier.verifyTraceCount(getExpectedRequestResponseTestTraceCount());
         } finally {
             clearResources(client, server);
