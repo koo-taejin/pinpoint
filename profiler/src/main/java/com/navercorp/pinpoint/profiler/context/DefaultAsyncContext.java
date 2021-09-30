@@ -64,6 +64,9 @@ public class DefaultAsyncContext implements AsyncContext {
         final Reference<Trace> reference = asyncTraceContext.currentRawTraceObject();
         final Trace nestedTrace = reference.get();
         if (nestedTrace != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Found nestedTrace:{}", nestedTrace);
+            }
             // return Nested Trace Object?
             if (nestedTrace.canSampled()) {
                 return nestedTrace;
