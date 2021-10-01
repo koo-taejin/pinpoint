@@ -24,6 +24,7 @@
         <version>2.3.1-SNAPSHOT</version>
     </parent>
 
+
     <artifactId>pinpoint-agent</artifactId>
     <name>pinpoint-agent-distribution</name>
 
