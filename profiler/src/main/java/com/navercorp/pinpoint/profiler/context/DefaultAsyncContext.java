@@ -55,11 +55,13 @@ public class DefaultAsyncContext implements AsyncContext {
 
 
     public TraceRoot getTraceRoot() {
+        logger.debug("getTraceRoot() {}", this);
         return traceRoot;
     }
 
     @Override
     public Trace continueAsyncTraceObject() {
+        logger.debug("continueAsyncTraceObject() {}", this);
 
         final Reference<Trace> reference = asyncTraceContext.currentRawTraceObject();
         final Trace nestedTrace = reference.get();
@@ -78,7 +80,10 @@ public class DefaultAsyncContext implements AsyncContext {
     }
 
     private Trace newAsyncTrace(Reference<Trace> reference) {
-//        final int asyncId = this.asyncId.getAsyncId();
+        logger.debug("newAsyncTrace({}) {}", reference, this);
+
+
+        //        final int asyncId = this.asyncId.getAsyncId();
 //        final short asyncSequence = this.asyncId.nextAsyncSequence();
         final LocalAsyncId localAsyncId = this.asyncId.nextLocalAsyncId();
         final Trace asyncTrace = asyncTraceContext.newAsyncTraceObject(traceRoot, localAsyncId);
@@ -114,6 +119,8 @@ public class DefaultAsyncContext implements AsyncContext {
     }
 
     private void bind(Reference<Trace> reference, Trace asyncTrace) {
+        logger.debug("bind(reference:{}, asyncTrace:{}) {}", reference, asyncTrace, this);
+
         Assert.state(reference.get() == null, "traceReference is  null");
 
         reference.set(asyncTrace);
@@ -122,6 +129,8 @@ public class DefaultAsyncContext implements AsyncContext {
 
     @Override
     public Trace currentAsyncTraceObject() {
+        logger.debug("currentAsyncTraceObject() {}", this);
+
         final Reference<Trace> reference = asyncTraceContext.currentTraceObject();
         return reference.get();
     }
@@ -129,15 +138,17 @@ public class DefaultAsyncContext implements AsyncContext {
 
     @Override
     public void close() {
+        logger.debug("close() {}", this);
+
         asyncTraceContext.removeTraceObject();
     }
 
-    @Override
-    public String toString() {
-        return "DefaultAsyncContext{" +
-                "traceRoot=" + traceRoot +
-                ", asyncId=" + asyncId +
-                '}';
-    }
+//    @Override
+//    public String toString() {
+//        return "DefaultAsyncContext{" +
+//                "traceRoot=" + traceRoot +
+//                ", asyncId=" + asyncId +
+//                '}';
+//    }
 
 }
