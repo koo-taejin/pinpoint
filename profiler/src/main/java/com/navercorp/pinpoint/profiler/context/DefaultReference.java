@@ -37,7 +37,7 @@ public class DefaultReference<V> implements Reference<V> {
     @Override
     public void set(V value) {
         if (logger.isDebugEnabled()) {
-            logger.debug("\tset:{}", value);
+            logger.debug("\tset:{}, before:{}", value, this.value);
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
             logger.debug("\tat:{}", stackTrace.toString());
         }
