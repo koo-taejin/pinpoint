@@ -81,6 +81,7 @@ jobs:
           report="${report//$'\n'/'%0A'}"
           report="${report//$'\r'/'%0D'}"
           echo ::set-output name=report::"$report"
+          df -h
       - name: Update  comment
         uses: peter-evans/create-or-update-comment@v1
         with:
