@@ -32,6 +32,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 7
+          targets: 'JDK_ZULU_7'
       - name: Set up JDK 9
         uses: actions/setup-java@v1
         with:
