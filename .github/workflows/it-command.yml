@@ -63,6 +63,7 @@ jobs:
             ${{ runner.os }}-node_install-
       - name: Build with Maven
         run: |
+            mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -DrepoUrl=https://repo.maven.apache.org/maven2 -Dartifact=com.oracle.database.jdbc:ojdbc10:19.3.0.0
             sudo rm -rf /usr/local/lib/android
             sudo rm -rf /usr/share/dotnet
             ./mvnw --batch-mode -Pit-module -DskipTests clean install
