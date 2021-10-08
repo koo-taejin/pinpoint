@@ -1,7 +1,7 @@
 name: it-shedule
 on:
   schedule:
-    - cron: '0 7 10 * *'
+    - cron: '10 7 * * *'
 jobs:
   example:
     runs-on: ubuntu-20.04
