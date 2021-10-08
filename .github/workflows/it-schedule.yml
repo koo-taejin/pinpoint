@@ -1,0 +1,85 @@
+name: it-shedule
+on:
+  schedule:
+    - cron: '0 7 10 * *'
+jobs:
+  example:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Create URL to the run output
+        id: vars
+        run: echo ::set-output name=run-url::https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up JDK 7
+        uses: actions/setup-java@v1
+        with:
+          java-version: 7
+      - name: Set up JDK Zula 7
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 7
+          targets: 'JDK_ZULU_7'
+      - name: Set up JDK 9
+        uses: actions/setup-java@v1
+        with:
+          java-version: 9
+      - name: Set JAVA_HOME
+        run: |
+          echo "JAVA_7_HOME=/opt/hostedtoolcache/Java_Zulu_jdk/7.0.312-1/x64" >> $GITHUB_ENV
+          echo "JAVA_8_HOME=$JAVA_HOME_8_X64" >> $GITHUB_ENV
+          echo "JAVA_9_HOME=$JAVA_HOME_9_0_7_X64" >> $GITHUB_ENV
+          echo "JAVA_11_HOME=$JAVA_HOME_11_X64" >> $GITHUB_ENV
+          echo "JAVA_HOME=$JAVA_HOME_8_X64" >> $GITHUB_ENV
+          df -h
+      - name: Java Environment
+        run: env | grep '^JAVA'
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2      
+      - name: Cache node install
+        uses: actions/cache@v2
+        with:
+          path: 'node_install'
+          key: ${{ runner.os }}-node_install-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-node_install-
+      - name: Build with Maven
+        run: |
+            mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -DrepoUrl=https://repo.maven.apache.org/maven2 -Dartifact=com.oracle.database.jdbc:ojdbc10:19.3.0.0
+            mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -DrepoUrl=https://repo.maven.apache.org/maven2 -Dartifact=com.oracle.database.jdbc:ojdbc10:19.6.0.0
+            mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -DrepoUrl=https://repo.maven.apache.org/maven2 -Dartifact=com.oracle.database.jdbc:ojdbc10:19.7.0.0
+            sudo rm -rf /usr/local/lib/android
+            sudo rm -rf /usr/share/dotnet
+            ./mvnw --batch-mode -Pit-module -DskipTests clean install
+            df -h
+      - name: Whole Integration Test
+        working-directory: ./plugins-it
+        run: ../mvnw --batch-mode clean install -Pit-module  -Dmaven.test.failure.ignore=true
+      - name: Reports
+        id: vars1
+        working-directory: ./plugins-it
+        run: |
+          report=$(cat ./*/target/failsafe-reports/*.txt | grep ^Tests)
+          report="${report//'%'/'%25'}"
+          report="${report//$'\n'/'%0A'}"
+          report="${report//$'\r'/'%0D'}"
+          echo ::set-output name=report::"$report"
+          df -h
+      - name: Publish Unit Test Results 1
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        with:
+          files: plugins-it/*/target/surefire-reports/TEST-*.xml
+      - name: Publish Test Report
+        uses: scacap/action-surefire-report@v1
