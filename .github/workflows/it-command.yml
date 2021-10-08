@@ -96,11 +96,8 @@ jobs:
           df -h
       - name: Publish Unit Test Results 1
         uses: EnricoMi/publish-unit-test-result-action@v1
-        if: always()
         with:
-          files: |
-            ./*/target/surefire-reports/TEST-*.xml
-            */target/surefire-reports/TEST-*.xml
+          files: plugins-it/*/target/surefire-reports/TEST-*.xml
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
       - name: Update  comment
