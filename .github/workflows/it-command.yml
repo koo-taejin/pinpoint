@@ -95,9 +95,7 @@ jobs:
           echo ::set-output name=report::"$report"
           df -h
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v2
-        with:
-          report_paths: '**/surefire-reports/TEST-*.xml'
+        uses: scacap/action-surefire-report@v1
       - name: Update  comment
         uses: peter-evans/create-or-update-comment@v1
         with:
