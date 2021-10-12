@@ -101,13 +101,13 @@ jobs:
       - name: Publish Unit Test Results 1
         uses: EnricoMi/publish-unit-test-result-action@v1
         with:
-          files: ./temp/TEST-*.xml
+          files: ./plugins-it/temp/TEST-*.xml
       - name: Publish Unit Test Results 3
         uses: dorny/test-reporter@v1
         with:
           name: pinpoint-test-results
           reporter: java-junit
-          path: './temp/TEST-*.xml'
+          path: './plugins-it/temp/TEST-*.xml'
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
       - name: Update  comment
