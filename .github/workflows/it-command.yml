@@ -117,4 +117,4 @@ jobs:
           comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
           body: |
             > ${{ steps.vars1.outputs.report }}
-            > ${{ steps.vars4.outputs }}
+            > ${{ toJSON(steps.vars4.outputs) }}
