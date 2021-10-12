@@ -3,7 +3,7 @@ on:
   schedule:
     - cron: '10 7 * * *'
 jobs:
-  example:
+  integration-test:
     runs-on: ubuntu-20.04
     steps:
       - name: Create URL to the run output
