@@ -88,8 +88,10 @@ jobs:
         id: vars1
         working-directory: ./plugins-it
         run: |
-          mkdir -p temp
-          find . -regex ".*/failsafe-reports/TEST.*" -exec cp "{}" ./temp \;
+          mkdir -p ./temp
+          find . -regex "find . -regex ".*/target/failsafe-reports/TEST.*\.xml"
+          find . -regex "find . -regex ".*/target/failsafe-reports/TEST.*\.xml" -exec cp "{}" ./temp \;
+          ls temp
           report=$(cat ./*/target/failsafe-reports/*.txt | grep ^Tests)
           report="${report//'%'/'%25'}"
           report="${report//$'\n'/'%0A'}"
