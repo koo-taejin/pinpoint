@@ -102,7 +102,7 @@ jobs:
         uses: dorny/test-reporter@v1
         with:
           name: pinpoint-test-results
-          reporter: pinpoint-it-junit     
+          reporter: java-junit
           path: '**/surefire-reports/TEST-*.xml'
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
