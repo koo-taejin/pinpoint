@@ -103,6 +103,7 @@ jobs:
         with:
           files: ./plugins-it/temp/TEST-*.xml
       - name: Publish Unit Test Results 3
+        id: vars4
         uses: dorny/test-reporter@v1
         with:
           name: pinpoint-test-results
@@ -116,3 +117,4 @@ jobs:
           comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
           body: |
             > ${{ steps.vars1.outputs.report }}
+            > ${{ steps.vars4.outputs }}
