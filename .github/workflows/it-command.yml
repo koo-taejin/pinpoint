@@ -98,6 +98,11 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v1
         with:
           files: plugins-it/*/target/surefire-reports/TEST-*.xml
+      - name: Publish Unit Test Results 3
+        uses: actions/upload-artifact@v2
+        with:
+          name: pinpoint-test-results
+          path: **/surefire-reports/TEST-*.xml 
       - name: Publish Test Report
         uses: scacap/action-surefire-report@v1
       - name: Update  comment
