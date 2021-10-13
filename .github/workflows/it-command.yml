@@ -122,3 +122,4 @@ jobs:
             > ${{ toJSON(steps.vars5.outputs) }}
             > ${{ github.run_id }}
             > ${{ github.run_number }}
+            > ![title](https://img.shields.io/static/v1?label=Tests&message=${{ steps.vars4.outputs.passed }}_passed&color=green)  ![title](https://img.shields.io/static/v1?label=Tests&message=${{ steps.vars4.outputs.failed }}_failed&color=red)
