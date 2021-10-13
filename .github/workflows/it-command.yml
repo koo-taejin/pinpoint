@@ -88,14 +88,8 @@ jobs:
         working-directory: ./plugins-it
         run: |
           mkdir -p ./temp
-          find . -regex ".*/target/failsafe-reports/TEST.*\.xml"
           find . -regex ".*/target/failsafe-reports/TEST.*\.xml" -exec cp "{}" ./temp \;
           ls temp
-          report=$(cat ./*/target/failsafe-reports/*.txt | grep ^Tests)
-          report="${report//'%'/'%25'}"
-          report="${report//$'\n'/'%0A'}"
-          report="${report//$'\r'/'%0D'}"
-          echo ::set-output name=report::"$report"
           df -h
       - name: Publish Unit Test Results 1
         id: vars5
@@ -121,4 +115,6 @@ jobs:
             > ${{ toJSON(steps.vars5.outputs) }}
             > ${{ github.run_id }}
             > ${{ github.run_number }}
+            > ${{ toJSON(steps.vars4) }}
+            > ${{ toJSON(steps.vars4.env) }}
             > ![title](https://img.shields.io/static/v1?label=Tests&message=${{ steps.vars4.outputs.passed }}_passed&color=green)  ![title](https://img.shields.io/static/v1?label=Tests&message=${{ steps.vars4.outputs.failed }}_failed&color=red)
