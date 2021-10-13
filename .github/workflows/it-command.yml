@@ -3,7 +3,7 @@ on:
   repository_dispatch:
     types: [it-command]
 jobs:
-  example:
+  integration-test:
     runs-on: ubuntu-20.04
     env:
       PR_NUMBER: ${{ github.event.client_payload.github.payload.issue.number }}
