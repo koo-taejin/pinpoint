@@ -96,3 +96,6 @@ jobs:
           comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
           body: |
             > ![title](https://img.shields.io/static/v1?label=Tests&message=${{ steps.test_reporter.outputs.passed }}_passed&color=green)  ![title](https://img.shields.io/static/v1?label=Tests&message=${{ steps.test_reporter.outputs.failed }}_failed&color=red)
+            > ${{ toJSON(steps.test_reporter) }}
+            > ${{ toJSON(steps.test_reporter.env) }}
+            
