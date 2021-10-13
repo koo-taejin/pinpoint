@@ -99,6 +99,7 @@ jobs:
           echo ::set-output name=report::"$report"
           df -h
       - name: Publish Unit Test Results 1
+        id: vars5
         uses: EnricoMi/publish-unit-test-result-action@v1
         with:
           files: ./plugins-it/temp/TEST-*.xml
@@ -118,3 +119,4 @@ jobs:
           body: |
             > ${{ steps.vars1.outputs.report }}
             > ${{ toJSON(steps.vars4.outputs) }}
+            > ${{ toJSON(steps.vars5.outputs) }}
