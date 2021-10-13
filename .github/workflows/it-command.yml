@@ -121,3 +121,4 @@ jobs:
             > ${{ toJSON(steps.vars4.outputs) }}
             > ${{ toJSON(steps.vars5.outputs) }}
             > ${{ github.run_id }}
+            > ${{ github.run_number }}
