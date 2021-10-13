@@ -2,9 +2,8 @@ name: it-command
 on:
   repository_dispatch:
     types: [it-command]
-
 jobs:
-  pullrequest_IT:
+  example:
     runs-on: ubuntu-20.04
     env:
       PR_NUMBER: ${{ github.event.client_payload.github.payload.issue.number }}
@@ -27,13 +26,19 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 7
+      - name: Set up JDK Zula 7
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 7
+          targets: 'JDK_ZULU_7'
       - name: Set up JDK 9
         uses: actions/setup-java@v1
         with:
           java-version: 9
       - name: Set JAVA_HOME
         run: |
-        echo "JAVA_7_HOME=$JAVA_HOME_7_0_312_X64" >> $GITHUB_ENV
+          echo "JAVA_7_HOME=/opt/hostedtoolcache/Java_Zulu_jdk/7.0.312-1/x64" >> $GITHUB_ENV
           echo "JAVA_8_HOME=$JAVA_HOME_8_X64" >> $GITHUB_ENV
           echo "JAVA_9_HOME=$JAVA_HOME_9_0_7_X64" >> $GITHUB_ENV
           echo "JAVA_11_HOME=$JAVA_HOME_11_X64" >> $GITHUB_ENV
@@ -53,7 +58,7 @@ jobs:
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          restore-keys: ${{ runner.os }}-m2      
       - name: Cache node install
         uses: actions/cache@v2
         with:
@@ -61,14 +66,15 @@ jobs:
           key: ${{ runner.os }}-node_install-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-node_install-
-      - name: Cleanup resources
+      - name: Build with Maven
         run: |
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /usr/share/dotnet
-          df -h
-      - name: Maven build
-        run: |
-          ./mvnw --batch-mode -Pit-module -DskipTests clean install
+            mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -DrepoUrl=https://repo.maven.apache.org/maven2 -Dartifact=com.oracle.database.jdbc:ojdbc10:19.3.0.0
+            mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -DrepoUrl=https://repo.maven.apache.org/maven2 -Dartifact=com.oracle.database.jdbc:ojdbc10:19.6.0.0
+            mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -DrepoUrl=https://repo.maven.apache.org/maven2 -Dartifact=com.oracle.database.jdbc:ojdbc10:19.7.0.0
+            sudo rm -rf /usr/local/lib/android
+            sudo rm -rf /usr/share/dotnet
+            ./mvnw --batch-mode -Pit-module -DskipTests clean install
+            df -h
       - name: Whole Integration Test
         if: github.event.client_payload.slash_command.args.all == ''
         working-directory: ./plugins-it
@@ -77,25 +83,42 @@ jobs:
         if: github.event.client_payload.slash_command.args.all != ''
         working-directory: ./plugins-it
         run: ../mvnw --batch-mode clean install -Pit-module -pl ${{ github.event.client_payload.slash_command.args.all }} -Dmaven.test.failure.ignore=true
-      - name: Collect reports
+      - name: Reports
+        id: vars1
         working-directory: ./plugins-it
         run: |
           mkdir -p ./temp
+          find . -regex ".*/target/failsafe-reports/TEST.*\.xml"
           find . -regex ".*/target/failsafe-reports/TEST.*\.xml" -exec cp "{}" ./temp \;
           ls temp
-      - name: Publish Unit Test Results
-        id: test_reporter
+          report=$(cat ./*/target/failsafe-reports/*.txt | grep ^Tests)
+          report="${report//'%'/'%25'}"
+          report="${report//$'\n'/'%0A'}"
+          report="${report//$'\r'/'%0D'}"
+          echo ::set-output name=report::"$report"
+          df -h
+      - name: Publish Unit Test Results 1
+        id: vars5
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        with:
+          files: ./plugins-it/temp/TEST-*.xml
+      - name: Publish Unit Test Results 3
+        id: vars4
         uses: dorny/test-reporter@v1
         with:
           name: pinpoint-test-results
           reporter: java-junit
           path: './plugins-it/temp/TEST-*.xml'
+      - name: Publish Test Report
+        uses: scacap/action-surefire-report@v1
       - name: Update  comment
         uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
           body: |
-            > ![title](https://img.shields.io/static/v1?label=Tests&message=${{ steps.test_reporter.outputs.passed }}_passed&color=green)  ![title](https://img.shields.io/static/v1?label=Tests&message=${{ steps.test_reporter.outputs.failed }}_failed&color=red)
-            > ${{ toJSON(steps.test_reporter) }}
-            > ${{ toJSON(steps.test_reporter.env) }}
-            
+            > ${{ steps.vars1.outputs.report }}
+            > ${{ toJSON(steps.vars4.outputs) }}
+            > ${{ toJSON(steps.vars5.outputs) }}
+            > ${{ github.run_id }}
+            > ${{ github.run_number }}
+            > ![title](https://img.shields.io/static/v1?label=Tests&message=${{ steps.vars4.outputs.passed }}_passed&color=green)  ![title](https://img.shields.io/static/v1?label=Tests&message=${{ steps.vars4.outputs.failed }}_failed&color=red)
