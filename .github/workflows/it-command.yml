@@ -9,6 +9,18 @@ jobs:
       PR_NUMBER: ${{ github.event.client_payload.github.payload.issue.number }}
       PR_P: ${{ github.event.issue.number }}
     steps:
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v20
+        with:
+         repositories: >
+          [
+            {
+              <id>google-maven-central</id>
+              <name>Google Maven Central</name>
+              <url>https://maven-central.storage.googleapis.com</url>
+              <mirrorOf>central</mirrorOf>
+            }
+          ]
       - name: Dump job context
         env:
           JOB_CONTEXT: ${{ toJSON(job) }}
