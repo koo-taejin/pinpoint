@@ -12,15 +12,7 @@ jobs:
       - name: maven-settings-xml-action
         uses: whelk-io/maven-settings-xml-action@v20
         with:
-         repositories: >
-          [
-            {
-              <id>google-maven-central</id>
-              <name>Google Maven Central</name>
-              <url>https://maven-central.storage.googleapis.com</url>
-              <mirrorOf>central</mirrorOf>
-            }
-          ]
+         repositories: '[{ "id": "google-maven-central", "url": "https://maven-central.storage.googleapis.com", "mirrorOf": "central" }]'
       - name: Dump job context
         env:
           JOB_CONTEXT: ${{ toJSON(job) }}
