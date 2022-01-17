@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NAVER Corp.
+ * Copyright 2022 NAVER Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,39 +29,25 @@ import java.util.List;
 public class CoroutinesConfig {
 
     private final boolean traceCoroutines;
-    private final List<String> nameIncludeList;
+    private final boolean recordThreadName;
 
     public CoroutinesConfig(ProfilerConfig config) {
         this.traceCoroutines = config.readBoolean("profiler.kotlin.coroutines.enable", false);
-        String nameIncludes = config.readString("profiler.kotlin.coroutines.name.include", "");
-
-        if (StringUtils.hasLength(nameIncludes)) {
-            String[] nameIncludeArray = nameIncludes.split(",");
-            List<String> result = new ArrayList<>(nameIncludeArray.length);
-            for (String nameInclude : nameIncludeArray) {
-                if (StringUtils.hasLength(nameInclude)) {
-                    result.add(nameInclude);
-                }
-            }
-            nameIncludeList = Collections.unmodifiableList(result);
-        } else {
-            nameIncludeList = Collections.emptyList();
-        }
+        this.recordThreadName = config.readBoolean("profiler.kotlin.coroutines.record.threadName", false);
     }
 
     public boolean isTraceCoroutines() {
         return traceCoroutines;
     }
 
-    public List<String> getIncludedNameList() {
-        return nameIncludeList;
+    public boolean isRecordThreadName() {
+        return recordThreadName;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CoroutinesConfig{");
         sb.append("traceCoroutines=").append(traceCoroutines);
-        sb.append(", nameIncludeList=").append(nameIncludeList);
         sb.append('}');
         return sb.toString();
     }

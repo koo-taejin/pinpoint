@@ -27,27 +27,27 @@ import com.navercorp.pinpoint.bootstrap.logging.PLogger;
 import com.navercorp.pinpoint.bootstrap.logging.PLoggerFactory;
 import com.navercorp.pinpoint.common.trace.ServiceType;
 import com.navercorp.pinpoint.common.util.ArrayUtils;
-import com.navercorp.pinpoint.plugin.kotlinx.coroutines.CoroutinesConstants;
+import kotlin.coroutines.Continuation;
 
 /**
  * @author Taejin Koo
  */
-public class DispatchInterceptor implements AroundInterceptor {
+public class ScheduleResumeInterceptor implements AroundInterceptor {
 
     private final PLogger logger = PLoggerFactory.getLogger(this.getClass());
     private final boolean isDebug = logger.isDebugEnabled();
 
-    private final MethodDescriptor descriptor;
     private final TraceContext traceContext;
+    private final MethodDescriptor descriptor;
     private final ServiceType serviceType;
 
-    public DispatchInterceptor(TraceContext traceContext, MethodDescriptor descriptor, ServiceType serviceType) {
+    public ScheduleResumeInterceptor(TraceContext traceContext, MethodDescriptor descriptor, ServiceType serviceType) {
         this.descriptor = descriptor;
         this.traceContext = traceContext;
         this.serviceType = serviceType;
     }
 
-    public DispatchInterceptor(TraceContext traceContext, MethodDescriptor descriptor) {
+    public ScheduleResumeInterceptor(TraceContext traceContext, MethodDescriptor descriptor) {
         this(traceContext, descriptor, ServiceType.INTERNAL_METHOD);
     }
 
@@ -57,24 +57,45 @@ public class DispatchInterceptor implements AroundInterceptor {
             logger.beforeInterceptor(target, descriptor.getClassName(), descriptor.getMethodName(), descriptor.getParameterDescriptor(), args);
         }
 
-        Trace trace = traceContext.currentTraceObject();
+        final Continuation continuation = getContinuation(args);
+        if (continuation == null) {
+            return;
+        }
+
+        final Trace trace = traceContext.currentTraceObject();
         if (trace == null) {
             return;
         }
 
         final SpanEventRecorder recorder = trace.traceBlockBegin();
-        recorder.recordServiceType(serviceType);
-
-        if (ArrayUtils.hasLength(args)) {
-            if (args[0] instanceof AsyncContextAccessor) {
-                AsyncContextAccessor accessor = (AsyncContextAccessor) args[0];
-                AsyncContext oldAsyncContext = accessor._$PINPOINT$_getAsyncContext();
-                if (oldAsyncContext == null) {
-                    final AsyncContext asyncContext = recorder.recordNextAsyncContext();
-                    accessor._$PINPOINT$_setAsyncContext(asyncContext);
-                }
+        final AsyncContextAccessor asyncContextAccessor = getAsyncContextAccessor(continuation);
+        if (asyncContextAccessor != null) {
+            AsyncContext asyncContext1 = asyncContextAccessor._$PINPOINT$_getAsyncContext();
+            if (asyncContext1 == null) {
+                // make asynchronous trace-id
+                final AsyncContext asyncContext = recorder.recordNextAsyncContext();
+                asyncContextAccessor._$PINPOINT$_setAsyncContext(asyncContext);
             }
         }
+    }
+
+    private Continuation getContinuation(final Object[] args) {
+        if (ArrayUtils.getLength(args) == 2 && args[1] instanceof Continuation) {
+            return (Continuation) args[1];
+        }
+        return null;
+    }
+
+    private AsyncContextAccessor getAsyncContextAccessor(final Continuation continuation) {
+        if (continuation == null) {
+            return null;
+        }
+
+        Object object = continuation.getContext();
+        if (object instanceof AsyncContextAccessor) {
+            return (AsyncContextAccessor) object;
+        }
+        return null;
     }
 
     @Override
@@ -83,7 +104,12 @@ public class DispatchInterceptor implements AroundInterceptor {
             logger.afterInterceptor(target, descriptor.getClassName(), descriptor.getMethodName(), descriptor.getParameterDescriptor(), args, result, throwable);
         }
 
-        Trace trace = traceContext.currentTraceObject();
+        final Continuation continuation = getContinuation(args);
+        if (continuation == null) {
+            return;
+        }
+
+        final Trace trace = traceContext.currentTraceObject();
         if (trace == null) {
             return;
         }
@@ -91,12 +117,11 @@ public class DispatchInterceptor implements AroundInterceptor {
         try {
             final SpanEventRecorder recorder = trace.currentSpanEventRecorder();
             recorder.recordApi(descriptor);
-            recorder.recordException(throwable);
             recorder.recordServiceType(serviceType);
+            recorder.recordException(throwable);
         } finally {
             trace.traceBlockEnd();
         }
-
     }
 
 }
