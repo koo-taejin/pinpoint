@@ -27,7 +27,8 @@ import com.navercorp.pinpoint.bootstrap.logging.PLogger;
 import com.navercorp.pinpoint.bootstrap.logging.PLoggerFactory;
 import com.navercorp.pinpoint.common.trace.ServiceType;
 import com.navercorp.pinpoint.common.util.ArrayUtils;
-import com.navercorp.pinpoint.plugin.kotlinx.coroutines.CoroutinesConstants;
+import kotlin.coroutines.Continuation;
+import kotlinx.coroutines.CancellableContinuation;
 
 /**
  * @author Taejin Koo
@@ -62,6 +63,10 @@ public class DispatchInterceptor implements AroundInterceptor {
             return;
         }
 
+        if (isCompletedContinuation(args)) {
+            return;
+        }
+
         final SpanEventRecorder recorder = trace.traceBlockBegin();
         recorder.recordServiceType(serviceType);
 
@@ -77,6 +82,16 @@ public class DispatchInterceptor implements AroundInterceptor {
         }
     }
 
+    private boolean isCompletedContinuation(final Object[] args) {
+        if (ArrayUtils.getLength(args) == 2 && args[1] instanceof Continuation) {
+            Continuation continuation = (Continuation) args[1];
+            if (continuation instanceof CancellableContinuation) {
+                return ((CancellableContinuation) continuation).isCompleted();
+            }
+        }
+        return false;
+    }
+
     @Override
     public void after(Object target, Object[] args, Object result, Throwable throwable) {
         if (isDebug) {
@@ -85,6 +100,10 @@ public class DispatchInterceptor implements AroundInterceptor {
 
         Trace trace = traceContext.currentTraceObject();
         if (trace == null) {
+            return;
+        }
+
+        if (isCompletedContinuation(args)) {
             return;
         }
 
