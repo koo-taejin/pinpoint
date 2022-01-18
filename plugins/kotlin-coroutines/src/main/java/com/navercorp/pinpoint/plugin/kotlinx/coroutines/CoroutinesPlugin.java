@@ -89,7 +89,7 @@ public class CoroutinesPlugin implements ProfilerPlugin, MatchableTransformTempl
     }
 
     private void addCombindContextTransformer() {
-        transformTemplate.transform("kotlin.coroutines.CombinedContext", CombindContextTransform.class);
+        transformTemplate.transform("kotlin.coroutines.CombinedContext", CombinedContextTransform.class);
     }
 
     private void addResumeWithTransformer() {
@@ -135,7 +135,7 @@ public class CoroutinesPlugin implements ProfilerPlugin, MatchableTransformTempl
 
     }
 
-    public static class CombindContextTransform implements TransformCallback {
+    public static class CombinedContextTransform implements TransformCallback {
 
         @Override
         public byte[] doInTransform(Instrumentor instrumentor, ClassLoader classLoader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws InstrumentException {
